@@ -20,5 +20,16 @@ lazy val root = (project in file("."))
       "io.circe"      %% "circe-generic"           % circeVersion,
       "io.circe"      %% "circe-parser"            % circeVersion,
       "ch.qos.logback" % "logback-classic"         % "1.4.3"
-    )
+    ),
+    Compile / mainClass := Some("ai.metarank.kpitrack.Main"),
+    ThisBuild / assemblyMergeStrategy := {
+      case PathList("module-info.class") => MergeStrategy.discard
+//      case "META-INF/io.netty.versions.properties" => MergeStrategy.first
+//      case "findbugsExclude.xml" => MergeStrategy.discard
+      case "log4j2-test.properties"              => MergeStrategy.discard
+      case x if x.endsWith("/module-info.class") => MergeStrategy.discard
+      case x =>
+        val oldStrategy = (ThisBuild / assemblyMergeStrategy).value
+        oldStrategy(x)
+    }
   )

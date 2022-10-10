@@ -25,12 +25,13 @@ case class DockerhubIndicators(
         uri = endpoint / "v2" / "repositories" / project / repo
       )
     )
+    _ <- info(response.toString)
   } yield {
     pulls.set(response.pull_count)
   }
 }
 
-object DockerhubIndicators {
+object DockerhubIndicators extends Logging  {
   case class RepoResponse(pull_count: Int)
   object RepoResponse {
     implicit val rrCodec: Codec[RepoResponse] = deriveCodec
@@ -40,6 +41,7 @@ object DockerhubIndicators {
     endpoint <- IO.fromEither(Uri.fromString("https://hub.docker.com"))
     project  <- IO.fromOption(env.get("DOCKERHUB_PROJECT"))(new Exception("project missing"))
     repo     <- IO.fromOption(env.get("DOCKERHUB_REPO"))(new Exception("project missing"))
+    _ <- info(s"Docker hub: project=$project repo=$repo")
   } yield {
     DockerhubIndicators(
       client = client,

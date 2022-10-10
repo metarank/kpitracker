@@ -12,17 +12,20 @@ import io.prometheus.client.CollectorRegistry
 import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.server.Router
 
-object Main extends IOApp {
+object Main extends IOApp with Logging {
   override def run(args: List[String]): IO[ExitCode] = {
     startApi().use(api =>
       createHttpClient().use(client =>
         for {
+          _ <- info("starting Metarank metric tracker")
           env <- IO {
             System.getenv().asScala.toMap
           }
-          github <- GithubIndicators.create(client, env)
-          docker <- DockerhubIndicators.create(client, env)
-          _      <- fs2.Stream.repeatEval[IO, Unit](tick(List(github, docker))).compile.drain
+          github       <- GithubIndicators.create(client, env)
+          docker       <- DockerhubIndicators.create(client, env)
+          totalMetrics <- IO(CollectorRegistry.defaultRegistry.metricFamilySamples().asIterator().asScala.toList.size)
+          _            <- info(s"registered $totalMetrics metrics")
+          _            <- fs2.Stream.repeatEval[IO, Unit](tick(List(github, docker))).compile.drain
 
         } yield {
           ExitCode.Success

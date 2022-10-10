@@ -42,26 +42,29 @@ case class GithubIndicators(
         headers = Headers(Authorization(Credentials.Token(AuthScheme.Bearer, token)))
       )
     )
+    _                  <- info(trafficViews.toString)
     todayTrafficOption <- IO(trafficViews.views.lastOption)
-    _                  <- info(s"views: $trafficViews")
     downloadResponse <- client.expect[List[ReleasesResponse]](
       Request[IO](
         uri = endpoint / "repos" / project / repo / "releases",
         headers = Headers(Authorization(Credentials.Token(AuthScheme.Bearer, token)))
       )
     )
+    _ <- info(downloadResponse.toString())
     repoResponse <- client.expect[RepoResponse](
       Request[IO](
         uri = endpoint / "repos" / project / repo,
         headers = Headers(Authorization(Credentials.Token(AuthScheme.Bearer, token)))
       )
     )
+    _ <- info(repoResponse.toString)
     referrerResponse <- client.expect[List[RefererResponse]](
       Request[IO](
         uri = endpoint / "repos" / project / repo / "traffic" / "popular" / "referrers",
         headers = Headers(Authorization(Credentials.Token(AuthScheme.Bearer, token)))
       )
     )
+    _ <- info(referrerResponse.toString())
   } yield {
     views.set(trafficViews.count)
     visitors.set(trafficViews.uniques)
@@ -86,7 +89,7 @@ case class GithubIndicators(
 
 }
 
-object GithubIndicators {
+object GithubIndicators extends Logging {
   import io.circe.generic.semiauto._
   case class TrafficViewsResponse(count: Int, uniques: Int, views: List[DailyViewCount])
 
@@ -124,6 +127,7 @@ object GithubIndicators {
     token    <- IO.fromOption(env.get("GITHUB_TOKEN"))(new Exception("github token missing"))
     project  <- IO.fromOption(env.get("GITHUB_PROJECT"))(new Exception("project missing"))
     repo     <- IO.fromOption(env.get("GITHUB_REPO"))(new Exception("project missing"))
+    _        <- info(s"GitHub: project=$project repo=$repo")
   } yield {
     GithubIndicators(
       client = client,
