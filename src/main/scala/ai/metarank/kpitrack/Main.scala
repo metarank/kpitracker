@@ -36,7 +36,7 @@ object Main extends IOApp with Logging {
 
   def tick(indicators: List[Indicator]): IO[Unit] = for {
     _ <- indicators.map(_.refresh()).sequence
-    _ <- IO.sleep(1.minute)
+    _ <- IO.sleep(60.minute)
   } yield {
     ///
   }
