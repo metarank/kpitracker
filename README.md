@@ -6,6 +6,14 @@ Currently tracked:
 * Github: forks, stars, traffic, issues, dowloads
 * Docker Hub: number of pulls
 
+## Setting up
+
+kpitracker is controlled using env variables:
+* `GITHUB_PROJECT`: for example `metarank` 
+* `GITHUB_REPO`: repo to watch for, like `metarank`
+* `GITHUB_TOKEN`: your github access token
+* `DOCKERHUB_PROJECT`: user name on DH.
+* `DOCKERHUB_REPO`: repo name on DH.
 
 ## Example response
 
