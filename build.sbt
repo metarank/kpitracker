@@ -19,7 +19,8 @@ lazy val root = (project in file("."))
       "io.circe"      %% "circe-core"              % circeVersion,
       "io.circe"      %% "circe-generic"           % circeVersion,
       "io.circe"      %% "circe-parser"            % circeVersion,
-      "ch.qos.logback" % "logback-classic"         % "1.4.3"
+      "ch.qos.logback" % "logback-classic"         % "1.4.3",
+      "com.slack.api"  % "slack-api-client"        % "1.26.1"
     ),
     Compile / mainClass := Some("ai.metarank.kpitrack.Main"),
     ThisBuild / assemblyMergeStrategy := {

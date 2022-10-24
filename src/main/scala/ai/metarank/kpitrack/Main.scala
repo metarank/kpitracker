@@ -1,7 +1,7 @@
 package ai.metarank.kpitrack
 
 import ai.metarank.kpitrack.api.MetricsApi
-import ai.metarank.kpitrack.kpi.{DockerhubIndicators, GithubIndicators, Indicator}
+import ai.metarank.kpitrack.kpi.{DockerhubIndicators, GithubIndicators, Indicator, SlackIndicators}
 import cats.effect.{ExitCode, IO, IOApp}
 import org.http4s.blaze.client.BlazeClientBuilder
 
@@ -23,9 +23,10 @@ object Main extends IOApp with Logging {
           }
           github       <- GithubIndicators.create(client, env)
           docker       <- DockerhubIndicators.create(client, env)
+          slack        <- SlackIndicators.create(env)
           totalMetrics <- IO(CollectorRegistry.defaultRegistry.metricFamilySamples().asIterator().asScala.toList.size)
           _            <- info(s"registered $totalMetrics metrics")
-          _            <- fs2.Stream.repeatEval[IO, Unit](tick(List(github, docker))).compile.drain
+          _            <- fs2.Stream.repeatEval[IO, Unit](tick(List(github, docker, slack))).compile.drain
 
         } yield {
           ExitCode.Success
@@ -43,7 +44,7 @@ object Main extends IOApp with Logging {
 
   def startApi() = {
     BlazeServerBuilder[IO]
-      .bindHttp(8080, "0.0.0.0")
+      .bindHttp(8090, "0.0.0.0")
       .withHttpApp(Router("/" -> MetricsApi(CollectorRegistry.defaultRegistry).routes).orNotFound)
       .serve
       .compile
